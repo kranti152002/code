@@ -1,0 +1,121 @@
+hospital-management-system/
+│
+├── public/                         # Static files
+│   ├── index.html
+│   ├── favicon.ico
+│   └── ...
+│
+├── src/                            # Source code
+│   ├── api/                        # API services
+│   │   ├── index.js                # Export all services
+│   │   ├── config.js               # API configuration (base URL, headers)
+│   │   ├── patientService.js
+│   │   ├── physicianService.js
+│   │   ├── departmentService.js
+│   │   ├── appointmentService.js
+│   │   ├── procedureService.js
+│   │   ├── nurseService.js
+│   │   ├── roomService.js
+│   │   ├── certificationService.js
+│   │   ├── insuranceService.js
+│   │   ├── affiliationService.js
+│   │   └── dashboardService.js
+│   │
+│   ├── components/                 # Reusable components
+│   │   ├── common/                 # Common UI components
+│   │   │   ├── Header.js
+│   │   │   ├── Sidebar.js
+│   │   │   ├── Footer.js
+│   │   │   ├── Table.js
+│   │   │   ├── Modal.js
+│   │   │   ├── Button.js
+│   │   │   ├── Card.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── patients/               # Patient-related components
+│   │   │   ├── PatientList.js
+│   │   │   ├── PatientDetails.js
+│   │   │   ├── PatientForm.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── physicians/             # Physician-related components
+│   │   │   ├── PhysicianList.js
+│   │   │   ├── PhysicianDetails.js
+│   │   │   ├── PhysicianForm.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── departments/            # Department-related components
+│   │   │   ├── DepartmentList.js
+│   │   │   ├── DepartmentDetails.js
+│   │   │   ├── DepartmentForm.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── appointments/           # Appointment-related components
+│   │   │   ├── AppointmentList.js
+│   │   │   ├── AppointmentDetails.js
+│   │   │   ├── AppointmentForm.js
+│   │   │   ├── Calendar.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── nurses/                 # Nurse-related components
+│   │   │   ├── NurseList.js
+│   │   │   ├── NurseDetails.js
+│   │   │   ├── NurseForm.js
+│   │   │   └── ...
+│   │   │
+│   │   ├── procedures/             # Procedure-related components
+│   │   │   ├── ProcedureList.js
+│   │   │   ├── ProcedureDetails.js
+│   │   │   ├── ProcedureForm.js
+│   │   │   └── ...
+│   │   │
+│   │   └── dashboard/              # Dashboard components
+│   │       ├── Dashboard.js
+│   │       ├── StatisticsCard.js
+│   │       ├── ChartComponent.js
+│   │       └── ...
+│   │
+│   ├── pages/                      # Page components that use smaller components
+│   │   ├── HomePage.js
+│   │   ├── PatientsPage.js
+│   │   ├── PhysiciansPage.js
+│   │   ├── DepartmentsPage.js
+│   │   ├── AppointmentsPage.js
+│   │   ├── NursesPage.js
+│   │   ├── ProceduresPage.js
+│   │   ├── DashboardPage.js
+│   │   ├── LoginPage.js
+│   │   └── ...
+│   │
+│   ├── contexts/                   # React contexts
+│   │   ├── AuthContext.js          # Authentication context
+│   │   └── ...
+│   │
+│   ├── hooks/                      # Custom React hooks
+│   │   ├── useAuth.js
+│   │   ├── useFetch.js
+│   │   ├── useForm.js
+│   │   └── ...
+│   │
+│   ├── utils/                      # Utility functions
+│   │   ├── dateUtils.js
+│   │   ├── formatters.js
+│   │   ├── validators.js
+│   │   └── ...
+│   │
+│   ├── styles/                     # Global styles
+│   │   ├── global.css
+│   │   ├── variables.css
+│   │   └── ...
+│   │
+│   ├── routes/                     # Routing configuration
+│   │   └── index.js
+│   │
+│   ├── App.js                      # Main App component
+│   └── index.js                    # Entry point
+│
+├── .env                            # Environment variables
+├── .gitignore
+├── package.json
+├── README.md
+└── ...
