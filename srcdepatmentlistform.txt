@@ -1,0 +1,183 @@
+
+1. src/components/departments/DepartmentList.js
+This component displays a list of departments.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchDepartments } from "../../api/departmentService";
+import Table from "../common/Table";
+
+const DepartmentList = () => {
+  const [departments, setDepartments] = useState([]);
+
+  useEffect(() => {
+    fetchDepartments().then((data) => setDepartments(data));
+  }, []);
+
+  const columns = [
+    { header: "ID", accessor: "DepartmentID" },
+    { header: "Name", accessor: "Name" },
+    { header: "Head", accessor: "Head" },
+  ];
+
+  return (
+    <div className="department-list">
+      <h2>Departments</h2>
+      <Table data={departments} columns={columns} />
+    </div>
+  );
+};
+
+export default DepartmentList;
+2. src/components/departments/DepartmentDetails.js
+This component displays detailed information about a specific department.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchDepartmentById, fetchDepartmentHead, fetchDepartmentHeadCertification } from "../../api/departmentService";
+import Card from "../common/Card";
+
+const DepartmentDetails = () => {
+  const { departmentId } = useParams();
+  const [department, setDepartment] = useState(null);
+  const [head, setHead] = useState(null);
+  const [certification, setCertification] = useState(null);
+
+  useEffect(() => {
+    fetchDepartmentById(departmentId).then((data) => setDepartment(data));
+    fetchDepartmentHead(departmentId).then((data) => setHead(data));
+    fetchDepartmentHeadCertification(departmentId).then((data) => setCertification(data));
+  }, [departmentId]);
+
+  if (!department || !head || !certification) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="department-details">
+      <h2>Department Details</h2>
+      <Card>
+        <p><strong>ID:</strong> {department.DepartmentID}</p>
+        <p><strong>Name:</strong> {department.Name}</p>
+        <p><strong>Head:</strong> {head.Name} (ID: {head.EmployeeID})</p>
+        <p><strong>Head Certification:</strong> {certification.Name}</p>
+      </Card>
+    </div>
+  );
+};
+
+export default DepartmentDetails;
+3. src/components/departments/DepartmentForm.js
+This component provides a form to add or update a department.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addDepartment, updateDepartmentHead, updateDepartmentName } from "../../api/departmentService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const DepartmentForm = ({ department, onSave }) => {
+  const [name, setName] = useState(department ? department.Name : "");
+  const [headId, setHeadId] = useState(department ? department.Head : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newDepartment = { Name: name, Head: headId };
+
+    try {
+      if (department) {
+        // Update existing department
+        await updateDepartmentName(department.DepartmentID, name);
+        await updateDepartmentHead(department.DepartmentID, headId);
+      } else {
+        // Add new department
+        await addDepartment(newDepartment);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving department:", error);
+    }
+  };
+
+  return (
+    <div className="department-form">
+      <h2>{department ? "Edit Department" : "Add Department"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Head ID:</label>
+          <input
+            type="text"
+            value={headId}
+            onChange={(e) => setHeadId(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{department ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Department {department ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default DepartmentForm;
+4. src/components/departments/styles.css
+This file contains the styles for the department-related components.
+
+css
+Copy
+/* Department List Styles */
+.department-list {
+  padding: 1rem;
+}
+
+/* Department Details Styles */
+.department-details {
+  padding: 1rem;
+}
+
+.department-details h2 {
+  margin-bottom: 1rem;
+}
+
+/* Department Form Styles */
+.department-form {
+  padding: 1rem;
+}
+
+.department-form h2 {
+  margin-bottom: 1rem;
+}
+
+.department-form div {
+  margin-bottom: 1rem;
+}
+
+.department-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.department-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}

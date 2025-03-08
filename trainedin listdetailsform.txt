@@ -1,0 +1,306 @@
+
+1. src/components/trainedIn/TrainedInList.js
+This component displays a list of physician training and certifications.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchCertifications } from "../../api/trainedInService";
+import Table from "../common/Table";
+
+const TrainedInList = () => {
+  const [certifications, setCertifications] = useState([]);
+
+  useEffect(() => {
+    fetchCertifications().then((data) => setCertifications(data));
+  }, []);
+
+  const columns = [
+    { header: "Physician ID", accessor: "Physician" },
+    { header: "Procedure Code", accessor: "Treatment" },
+    { header: "Certification Date", accessor: "CertificationDate" },
+    { header: "Expiry Date", accessor: "CertificationExpires" },
+  ];
+
+  return (
+    <div className="trained-in-list">
+      <h2>Physician Training and Certifications</h2>
+      <Table data={certifications} columns={columns} />
+    </div>
+  );
+};
+
+export default TrainedInList;
+2. src/components/trainedIn/TrainedInForm.js
+This component provides a form to add or update a physician's training or certification.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addCertification, updateCertificationExpiry } from "../../api/trainedInService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const TrainedInForm = ({ certification, onSave }) => {
+  const [physicianId, setPhysicianId] = useState(certification ? certification.Physician : "");
+  const [procedureId, setProcedureId] = useState(certification ? certification.Treatment : "");
+  const [certificationDate, setCertificationDate] = useState(certification ? certification.CertificationDate : "");
+  const [expiryDate, setExpiryDate] = useState(certification ? certification.CertificationExpires : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newCertification = {
+      Physician: physicianId,
+      Treatment: procedureId,
+      CertificationDate: certificationDate,
+      CertificationExpires: expiryDate,
+    };
+
+    try {
+      if (certification) {
+        // Update certification expiry date
+        await updateCertificationExpiry(physicianId, procedureId, expiryDate);
+      } else {
+        // Add new certification
+        await addCertification(newCertification);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving certification:", error);
+    }
+  };
+
+  return (
+    <div className="trained-in-form">
+      <h2>{certification ? "Edit Certification" : "Add Certification"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Physician ID:</label>
+          <input
+            type="text"
+            value={physicianId}
+            onChange={(e) => setPhysicianId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Procedure Code:</label>
+          <input
+            type="text"
+            value={procedureId}
+            onChange={(e) => setProcedureId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Certification Date:</label>
+          <input
+            type="date"
+            value={certificationDate}
+            onChange={(e) => setCertificationDate(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Expiry Date:</label>
+          <input
+            type="date"
+            value={expiryDate}
+            onChange={(e) => setExpiryDate(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{certification ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Certification {certification ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default TrainedInForm;
+3. src/components/trainedIn/TrainedInDetails.js
+This component displays detailed information about a specific physician's training or certification.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  fetchTreatmentsByPhysician,
+  fetchPhysiciansByTreatment,
+  fetchExpiringCertifications,
+} from "../../api/trainedInService";
+import Card from "../common/Card";
+
+const TrainedInDetails = () => {
+  const { physicianId, procedureId } = useParams();
+  const [treatments, setTreatments] = useState([]);
+  const [physicians, setPhysicians] = useState([]);
+  const [expiringCertifications, setExpiringCertifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch treatments a physician can perform
+        const treatmentsData = await fetchTreatmentsByPhysician(physicianId);
+        setTreatments(treatmentsData);
+
+        // Fetch physicians who can perform a specific treatment
+        const physiciansData = await fetchPhysiciansByTreatment(procedureId);
+        setPhysicians(physiciansData);
+
+        // Fetch certifications expiring soon
+        const expiringCertificationsData = await fetchExpiringCertifications(physicianId);
+        setExpiringCertifications(expiringCertificationsData);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching certification details:", error);
+        setError("Failed to load certification details. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [physicianId, procedureId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!treatments.length || !physicians.length || !expiringCertifications.length) {
+    return <div>No data found for this certification.</div>;
+  }
+
+  return (
+    <div className="trained-in-details">
+      <h2>Certification Details</h2>
+      <Card>
+        <p>
+          <strong>Physician ID:</strong> {physicianId}
+        </p>
+        <p>
+          <strong>Procedure Code:</strong> {procedureId}
+        </p>
+      </Card>
+
+      <h3>Treatments Physician Can Perform</h3>
+      <ul>
+        {treatments.map((treatment) => (
+          <li key={treatment.Code}>
+            {treatment.Name} (Code: {treatment.Code})
+          </li>
+        ))}
+      </ul>
+
+      <h3>Physicians Who Can Perform This Treatment</h3>
+      <ul>
+        {physicians.map((physician) => (
+          <li key={physician.EmployeeID}>
+            {physician.Name} (ID: {physician.EmployeeID})
+          </li>
+        ))}
+      </ul>
+
+      <h3>Certifications Expiring Soon</h3>
+      <ul>
+        {expiringCertifications.map((certification) => (
+          <li key={certification.Code}>
+            {certification.Name} (Expires on: {certification.CertificationExpires})
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default TrainedInDetails;
+4. src/components/trainedIn/styles.css
+This file contains the styles for the training and certification-related components.
+
+css
+Copy
+/* TrainedIn List Styles */
+.trained-in-list {
+  padding: 1rem;
+}
+
+.trained-in-list h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* TrainedIn Form Styles */
+.trained-in-form {
+  padding: 1rem;
+}
+
+.trained-in-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.trained-in-form div {
+  margin-bottom: 1rem;
+}
+
+.trained-in-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.trained-in-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* TrainedIn Details Styles */
+.trained-in-details {
+  padding: 1rem;
+}
+
+.trained-in-details h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.trained-in-details h3 {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.trained-in-details ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.trained-in-details ul li {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}

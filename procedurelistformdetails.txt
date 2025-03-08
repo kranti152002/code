@@ -1,0 +1,267 @@
+
+1. src/components/procedures/ProcedureList.js
+This component displays a list of medical procedures.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchProcedures } from "../../api/procedureService";
+import Table from "../common/Table";
+
+const ProcedureList = () => {
+  const [procedures, setProcedures] = useState([]);
+
+  useEffect(() => {
+    fetchProcedures().then((data) => setProcedures(data));
+  }, []);
+
+  const columns = [
+    { header: "Code", accessor: "Code" },
+    { header: "Name", accessor: "Name" },
+    { header: "Cost", accessor: "Cost" },
+  ];
+
+  return (
+    <div className="procedure-list">
+      <h2>Medical Procedures</h2>
+      <Table data={procedures} columns={columns} />
+    </div>
+  );
+};
+
+export default ProcedureList;
+2. src/components/procedures/ProcedureDetails.js
+This component displays detailed information about a specific medical procedure.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchProcedureCostById, fetchProcedureCostByName } from "../../api/procedureService";
+import Card from "../common/Card";
+
+const ProcedureDetails = () => {
+  const { procedureId } = useParams();
+  const [procedure, setProcedure] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch procedure details by ID
+        const procedureData = await fetchProcedureCostById(procedureId);
+        setProcedure(procedureData);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching procedure details:", error);
+        setError("Failed to load procedure details. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [procedureId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!procedure) {
+    return <div>No data found for this procedure.</div>;
+  }
+
+  return (
+    <div className="procedure-details">
+      <h2>Procedure Details</h2>
+      <Card>
+        <p>
+          <strong>Code:</strong> {procedure.Code}
+        </p>
+        <p>
+          <strong>Name:</strong> {procedure.Name}
+        </p>
+        <p>
+          <strong>Cost:</strong> ${procedure.Cost}
+        </p>
+      </Card>
+    </div>
+  );
+};
+
+export default ProcedureDetails;
+3. src/components/procedures/ProcedureForm.js
+This component provides a form to add or update a medical procedure.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addProcedure, updateProcedureCost, updateProcedureName } from "../../api/procedureService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const ProcedureForm = ({ procedure, onSave }) => {
+  const [code, setCode] = useState(procedure ? procedure.Code : "");
+  const [name, setName] = useState(procedure ? procedure.Name : "");
+  const [cost, setCost] = useState(procedure ? procedure.Cost : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newProcedure = { Code: code, Name: name, Cost: cost };
+
+    try {
+      if (procedure) {
+        // Update existing procedure
+        await updateProcedureName(procedure.Code, name);
+        await updateProcedureCost(procedure.Code, cost);
+      } else {
+        // Add new procedure
+        await addProcedure(newProcedure);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving procedure:", error);
+    }
+  };
+
+  return (
+    <div className="procedure-form">
+      <h2>{procedure ? "Edit Procedure" : "Add Procedure"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Code:</label>
+          <input
+            type="text"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Cost:</label>
+          <input
+            type="number"
+            value={cost}
+            onChange={(e) => setCost(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{procedure ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Procedure {procedure ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default ProcedureForm;
+4. src/components/procedures/styles.css
+This file contains the styles for the procedure-related components.
+
+css
+Copy
+/* Procedure List Styles */
+.procedure-list {
+  padding: 1rem;
+}
+
+.procedure-list h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Procedure Details Styles */
+.procedure-details {
+  padding: 1rem;
+}
+
+.procedure-details h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.procedure-details .card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.procedure-details p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.procedure-details strong {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Procedure Form Styles */
+.procedure-form {
+  padding: 1rem;
+}
+
+.procedure-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.procedure-form div {
+  margin-bottom: 1rem;
+}
+
+.procedure-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.procedure-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+**5. Explanation of the Code
+API Integration
+fetchProcedures: Fetches all medical procedures.
+
+fetchProcedureCostById: Fetches the cost of a procedure by its ID.
+
+fetchProcedureCostByName: Fetches the cost of a procedure by its name.
+
+addProcedure: Adds a new procedure.
+
+updateProcedureCost: Updates the cost of a procedure.
+
+updateProcedureName: Updates the name of a procedure.
