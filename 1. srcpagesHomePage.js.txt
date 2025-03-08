@@ -1,0 +1,400 @@
+1. src/pages/HomePage.js
+This is the home page of the application.
+
+javascript
+Copy
+import React from "react";
+import Header from "../components/common/Header";
+import Sidebar from "../components/common/Sidebar";
+import Footer from "../components/common/Footer";
+
+const HomePage = () => {
+  return (
+    <div className="home-page">
+      <Header />
+      <Sidebar />
+      <main>
+        <h2>Welcome to the Hospital Management System</h2>
+        <p>Manage physicians, departments, patients, appointments, and more.</p>
+      </main>
+      <Footer />
+    </div>
+  );
+};
+
+export default HomePage;
+2. src/pages/PhysiciansPage.js
+This page displays a list of physicians and allows adding/editing physicians.
+
+javascript
+Copy
+import React, { useState } from "react";
+import PhysicianList from "../components/physicians/PhysicianList";
+import PhysicianForm from "../components/physicians/PhysicianForm";
+import Button from "../components/common/Button";
+
+const PhysiciansPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="physicians-page">
+      <h2>Physicians</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Physician"}
+      </Button>
+      {showForm && <PhysicianForm onSave={() => setShowForm(false)} />}
+      <PhysicianList />
+    </div>
+  );
+};
+
+export default PhysiciansPage;
+3. src/pages/DepartmentsPage.js
+This page displays a list of departments and allows adding/editing departments.
+
+javascript
+Copy
+import React, { useState } from "react";
+import DepartmentList from "../components/departments/DepartmentList";
+import DepartmentForm from "../components/departments/DepartmentForm";
+import Button from "../components/common/Button";
+
+const DepartmentsPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="departments-page">
+      <h2>Departments</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Department"}
+      </Button>
+      {showForm && <DepartmentForm onSave={() => setShowForm(false)} />}
+      <DepartmentList />
+    </div>
+  );
+};
+
+export default DepartmentsPage;
+4. src/pages/AffiliationsPage.js
+This page displays physician-department affiliations and allows adding/editing affiliations.
+
+javascript
+Copy
+import React, { useState } from "react";
+import AffiliationList from "../components/affiliations/AffiliationList";
+import AffiliationForm from "../components/affiliations/AffiliationForm";
+import Button from "../components/common/Button";
+
+const AffiliationsPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="affiliations-page">
+      <h2>Physician-Department Affiliations</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Affiliation"}
+      </Button>
+      {showForm && <AffiliationForm onSave={() => setShowForm(false)} />}
+      <AffiliationList />
+    </div>
+  );
+};
+
+export default AffiliationsPage;
+5. src/pages/ProceduresPage.js
+This page displays medical procedures and allows adding/editing procedures.
+
+javascript
+Copy
+import React, { useState } from "react";
+import ProcedureList from "../components/procedures/ProcedureList";
+import ProcedureForm from "../components/procedures/ProcedureForm";
+import Button from "../components/common/Button";
+
+const ProceduresPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="procedures-page">
+      <h2>Medical Procedures</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Procedure"}
+      </Button>
+      {showForm && <ProcedureForm onSave={() => setShowForm(false)} />}
+      <ProcedureList />
+    </div>
+  );
+};
+
+export default ProceduresPage;
+6. src/pages/TrainedInPage.js
+This page displays physician training and certifications and allows adding/editing certifications.
+
+javascript
+Copy
+import React, { useState } from "react";
+import TrainedInList from "../components/trainedIn/TrainedInList";
+import TrainedInForm from "../components/trainedIn/TrainedInForm";
+import Button from "../components/common/Button";
+
+const TrainedInPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="trained-in-page">
+      <h2>Physician Training and Certifications</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Certification"}
+      </Button>
+      {showForm && <TrainedInForm onSave={() => setShowForm(false)} />}
+      <TrainedInList />
+    </div>
+  );
+};
+
+export default TrainedInPage;
+7. src/pages/PatientsPage.js
+This page displays a list of patients and allows adding/editing patients.
+
+javascript
+Copy
+import React, { useState } from "react";
+import PatientList from "../components/patients/PatientList";
+import PatientForm from "../components/patients/PatientForm";
+import Button from "../components/common/Button";
+
+const PatientsPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="patients-page">
+      <h2>Patients</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Patient"}
+      </Button>
+      {showForm && <PatientForm onSave={() => setShowForm(false)} />}
+      <PatientList />
+    </div>
+  );
+};
+
+export default PatientsPage;
+8. src/pages/NursesPage.js
+This page displays a list of nurses and allows adding/editing nurses.
+
+javascript
+Copy
+import React, { useState } from "react";
+import NurseList from "../components/nurses/NurseList";
+import NurseForm from "../components/nurses/NurseForm";
+import Button from "../components/common/Button";
+
+const NursesPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="nurses-page">
+      <h2>Nurses</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Nurse"}
+      </Button>
+      {showForm && <NurseForm onSave={() => setShowForm(false)} />}
+      <NurseList />
+    </div>
+  );
+};
+
+export default NursesPage;
+9. src/pages/AppointmentsPage.js
+This page displays a list of appointments and allows adding/editing appointments.
+
+javascript
+Copy
+import React, { useState } from "react";
+import AppointmentList from "../components/appointments/AppointmentList";
+import AppointmentForm from "../components/appointments/AppointmentForm";
+import Button from "../components/common/Button";
+
+const AppointmentsPage = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  return (
+    <div className="appointments-page">
+      <h2>Appointments</h2>
+      <Button onClick={() => setShowForm(!showForm)}>
+        {showForm ? "Hide Form" : "Add Appointment"}
+      </Button>
+      {showForm && <AppointmentForm onSave={() => setShowForm(false)} />}
+      <AppointmentList />
+    </div>
+  );
+};
+
+export default AppointmentsPage;
+10. src/pages/DashboardPage.js
+This page displays the dashboard with statistics and charts.
+
+javascript
+Copy
+import React from "react";
+import Dashboard from "../components/dashboard/Dashboard";
+
+const DashboardPage = () => {
+  return (
+    <div className="dashboard-page">
+      <h2>Dashboard</h2>
+      <Dashboard />
+    </div>
+  );
+};
+
+export default DashboardPage;
+11. src/pages/LoginPage.js
+This page provides a login form for users.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "../components/common/Button";
+
+const LoginPage = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Add authentication logic here
+    navigate("/dashboard"); // Redirect to dashboard after login
+  };
+
+  return (
+    <div className="login-page">
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label>Username:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">Login</Button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;
+12. src/pages/styles.css
+This file contains the styles for all the pages.
+
+css
+Copy
+/* Global Page Styles */
+.home-page,
+.physicians-page,
+.departments-page,
+.affiliations-page,
+.procedures-page,
+.trained-in-page,
+.patients-page,
+.nurses-page,
+.appointments-page,
+.dashboard-page,
+.login-page {
+  padding: 1rem;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Form Styles */
+form {
+  margin-bottom: 1rem;
+}
+
+form div {
+  margin-bottom: 1rem;
+}
+
+form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Button Styles */
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .statistics {
+    flex-direction: column;
+  }
+
+  .charts {
+    flex-direction: column;
+  }
+}
+**13. Summary
+HomePage.js: Displays the home page with a welcome message.
+
+PhysiciansPage.js: Displays and manages physicians.
+
+DepartmentsPage.js: Displays and manages departments.
+
+AffiliationsPage.js: Displays and manages physician-department affiliations.
+
+ProceduresPage.js: Displays and manages medical procedures.
+
+TrainedInPage.js: Displays and manages physician training and certifications.
+
+PatientsPage.js: Displays and manages patients.
+
+NursesPage.js: Displays and manages nurses.
+
+AppointmentsPage.js: Displays and manages appointments.
+
+DashboardPage.js: Displays the dashboard with statistics and charts.
+
+LoginPage.js: Provides a login form for users.
+
+styles.css: Contains styles for all the pages, ensuring responsiveness.
+
+Let me know if you need further assistance! 🚀
+
+New chat

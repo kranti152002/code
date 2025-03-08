@@ -1,0 +1,382 @@
+1. src/components/appointments/AppointmentList.js
+This component displays a list of appointments.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchAppointments } from "../../api/appointmentService";
+import Table from "../common/Table";
+
+const AppointmentList = () => {
+  const [appointments, setAppointments] = useState([]);
+
+  useEffect(() => {
+    fetchAppointments().then((data) => setAppointments(data));
+  }, []);
+
+  const columns = [
+    { header: "Appointment ID", accessor: "AppointmentID" },
+    { header: "Patient ID", accessor: "Patient" },
+    { header: "Physician ID", accessor: "Physician" },
+    { header: "Start Time", accessor: "Starto" },
+    { header: "End Time", accessor: "Endo" },
+    { header: "Examination Room", accessor: "ExaminationRoom" },
+  ];
+
+  return (
+    <div className="appointment-list">
+      <h2>Appointments</h2>
+      <Table data={appointments} columns={columns} />
+    </div>
+  );
+};
+
+export default AppointmentList;
+2. src/components/appointments/AppointmentDetails.js
+This component displays detailed information about a specific appointment.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  fetchPatientByAppointmentId,
+  fetchPhysicianByAppointmentId,
+  fetchNurseByAppointmentId,
+  fetchExaminationRoomByAppointmentId,
+} from "../../api/appointmentService";
+import Card from "../common/Card";
+
+const AppointmentDetails = () => {
+  const { appointmentId } = useParams();
+  const [patient, setPatient] = useState(null);
+  const [physician, setPhysician] = useState(null);
+  const [nurse, setNurse] = useState(null);
+  const [room, setRoom] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch patient details
+        const patientData = await fetchPatientByAppointmentId(appointmentId);
+        setPatient(patientData);
+
+        // Fetch physician details
+        const physicianData = await fetchPhysicianByAppointmentId(appointmentId);
+        setPhysician(physicianData);
+
+        // Fetch nurse details
+        const nurseData = await fetchNurseByAppointmentId(appointmentId);
+        setNurse(nurseData);
+
+        // Fetch examination room details
+        const roomData = await fetchExaminationRoomByAppointmentId(appointmentId);
+        setRoom(roomData);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching appointment details:", error);
+        setError("Failed to load appointment details. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [appointmentId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!patient || !physician || !nurse || !room) {
+    return <div>No data found for this appointment.</div>;
+  }
+
+  return (
+    <div className="appointment-details">
+      <h2>Appointment Details</h2>
+      <Card>
+        <p>
+          <strong>Appointment ID:</strong> {appointmentId}
+        </p>
+        <p>
+          <strong>Patient:</strong> {patient.Name} (ID: {patient.SSN})
+        </p>
+        <p>
+          <strong>Physician:</strong> {physician.Name} (ID: {physician.EmployeeID})
+        </p>
+        <p>
+          <strong>Nurse:</strong> {nurse.Name} (ID: {nurse.EmployeeID})
+        </p>
+        <p>
+          <strong>Examination Room:</strong> {room.RoomNumber} ({room.RoomType})
+        </p>
+      </Card>
+    </div>
+  );
+};
+
+export default AppointmentDetails;
+3. src/components/appointments/AppointmentForm.js
+This component provides a form to add or update an appointment.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addAppointment, updateExaminationRoom } from "../../api/appointmentService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const AppointmentForm = ({ appointment, onSave }) => {
+  const [patientId, setPatientId] = useState(appointment ? appointment.Patient : "");
+  const [physicianId, setPhysicianId] = useState(appointment ? appointment.Physician : "");
+  const [nurseId, setNurseId] = useState(appointment ? appointment.PrepNurse : "");
+  const [startTime, setStartTime] = useState(appointment ? appointment.Starto : "");
+  const [endTime, setEndTime] = useState(appointment ? appointment.Endo : "");
+  const [room, setRoom] = useState(appointment ? appointment.ExaminationRoom : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newAppointment = {
+      Patient: patientId,
+      Physician: physicianId,
+      PrepNurse: nurseId,
+      Starto: startTime,
+      Endo: endTime,
+      ExaminationRoom: room,
+    };
+
+    try {
+      if (appointment) {
+        // Update existing appointment
+        await updateExaminationRoom(appointment.AppointmentID, room);
+      } else {
+        // Add new appointment
+        await addAppointment(newAppointment);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving appointment:", error);
+    }
+  };
+
+  return (
+    <div className="appointment-form">
+      <h2>{appointment ? "Edit Appointment" : "Add Appointment"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Patient ID:</label>
+          <input
+            type="text"
+            value={patientId}
+            onChange={(e) => setPatientId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Physician ID:</label>
+          <input
+            type="text"
+            value={physicianId}
+            onChange={(e) => setPhysicianId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Nurse ID:</label>
+          <input
+            type="text"
+            value={nurseId}
+            onChange={(e) => setNurseId(e.target.value)}
+          />
+        </div>
+        <div>
+          <label>Start Time:</label>
+          <input
+            type="datetime-local"
+            value={startTime}
+            onChange={(e) => setStartTime(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>End Time:</label>
+          <input
+            type="datetime-local"
+            value={endTime}
+            onChange={(e) => setEndTime(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Examination Room:</label>
+          <input
+            type="text"
+            value={room}
+            onChange={(e) => setRoom(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{appointment ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Appointment {appointment ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default AppointmentForm;
+4. src/components/appointments/Calendar.js
+This component provides a calendar view for appointments.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchAppointmentsByStartDate } from "../../api/appointmentService";
+import FullCalendar from "@fullcalendar/react"; // npm install @fullcalendar/react
+import dayGridPlugin from "@fullcalendar/daygrid"; // npm install @fullcalendar/daygrid
+
+const Calendar = () => {
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    fetchAppointmentsByStartDate(new Date().toISOString()).then((data) => {
+      const formattedEvents = data.map((appointment) => ({
+        title: `Appointment ${appointment.AppointmentID}`,
+        start: appointment.Starto,
+        end: appointment.Endo,
+      }));
+      setEvents(formattedEvents);
+    });
+  }, []);
+
+  return (
+    <div className="calendar">
+      <h2>Appointment Calendar</h2>
+      <FullCalendar
+        plugins={[dayGridPlugin]}
+        initialView="dayGridMonth"
+        events={events}
+      />
+    </div>
+  );
+};
+
+export default Calendar;
+5. src/components/appointments/styles.css
+This file contains the styles for the appointment-related components.
+
+css
+Copy
+/* Appointment List Styles */
+.appointment-list {
+  padding: 1rem;
+}
+
+.appointment-list h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Appointment Details Styles */
+.appointment-details {
+  padding: 1rem;
+}
+
+.appointment-details h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.appointment-details .card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.appointment-details p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.appointment-details strong {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Appointment Form Styles */
+.appointment-form {
+  padding: 1rem;
+}
+
+.appointment-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.appointment-form div {
+  margin-bottom: 1rem;
+}
+
+.appointment-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.appointment-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Calendar Styles */
+.calendar {
+  padding: 1rem;
+}
+
+.calendar h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+**6. Explanation of the Code
+API Integration
+fetchAppointments: Fetches all appointments.
+
+fetchPatientByAppointmentId: Fetches patient details by appointment ID.
+
+fetchPhysicianByAppointmentId: Fetches physician details by appointment ID.
+
+fetchNurseByAppointmentId: Fetches nurse details by appointment ID.
+
+fetchExaminationRoomByAppointmentId: Fetches examination room details by appointment ID.
+
+addAppointment: Adds a new appointment.
+
+updateExaminationRoom: Updates the examination room of an appointment.
+
+fetchAppointmentsByStartDate: Fetches appointments by start date for the calendar.

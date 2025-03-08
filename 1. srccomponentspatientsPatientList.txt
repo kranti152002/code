@@ -1,0 +1,299 @@
+1. src/components/patients/PatientList.js
+This component displays a list of patients.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchPatients } from "../../api/patientService";
+import Table from "../common/Table";
+
+const PatientList = () => {
+  const [patients, setPatients] = useState([]);
+
+  useEffect(() => {
+    fetchPatients().then((data) => setPatients(data));
+  }, []);
+
+  const columns = [
+    { header: "SSN", accessor: "SSN" },
+    { header: "Name", accessor: "Name" },
+    { header: "Address", accessor: "Address" },
+    { header: "Phone", accessor: "Phone" },
+    { header: "Insurance ID", accessor: "InsuranceID" },
+  ];
+
+  return (
+    <div className="patient-list">
+      <h2>Patients</h2>
+      <Table data={patients} columns={columns} />
+    </div>
+  );
+};
+
+export default PatientList;
+2. src/components/patients/PatientDetails.js
+This component displays detailed information about a specific patient.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchPatientDetailsByPhysician, fetchPatientInsurance } from "../../api/patientService";
+import Card from "../common/Card";
+
+const PatientDetails = () => {
+  const { patientId, physicianId } = useParams();
+  const [patient, setPatient] = useState(null);
+  const [insurance, setInsurance] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch patient details
+        const patientData = await fetchPatientDetailsByPhysician(physicianId, patientId);
+        setPatient(patientData);
+
+        // Fetch patient insurance
+        const insuranceData = await fetchPatientInsurance(patientId);
+        setInsurance(insuranceData);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching patient details:", error);
+        setError("Failed to load patient details. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [patientId, physicianId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!patient || !insurance) {
+    return <div>No data found for this patient.</div>;
+  }
+
+  return (
+    <div className="patient-details">
+      <h2>Patient Details</h2>
+      <Card>
+        <p>
+          <strong>SSN:</strong> {patient.SSN}
+        </p>
+        <p>
+          <strong>Name:</strong> {patient.Name}
+        </p>
+        <p>
+          <strong>Address:</strong> {patient.Address}
+        </p>
+        <p>
+          <strong>Phone:</strong> {patient.Phone}
+        </p>
+        <p>
+          <strong>Insurance ID:</strong> {insurance}
+        </p>
+      </Card>
+    </div>
+  );
+};
+
+export default PatientDetails;
+3. src/components/patients/PatientForm.js
+This component provides a form to add or update a patient.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addPatient, updatePatientAddress, updatePatientPhone } from "../../api/patientService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const PatientForm = ({ patient, onSave }) => {
+  const [ssn, setSSN] = useState(patient ? patient.SSN : "");
+  const [name, setName] = useState(patient ? patient.Name : "");
+  const [address, setAddress] = useState(patient ? patient.Address : "");
+  const [phone, setPhone] = useState(patient ? patient.Phone : "");
+  const [insuranceId, setInsuranceId] = useState(patient ? patient.InsuranceID : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newPatient = { SSN: ssn, Name: name, Address: address, Phone: phone, InsuranceID: insuranceId };
+
+    try {
+      if (patient) {
+        // Update existing patient
+        await updatePatientAddress(ssn, address);
+        await updatePatientPhone(ssn, phone);
+      } else {
+        // Add new patient
+        await addPatient(newPatient);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving patient:", error);
+    }
+  };
+
+  return (
+    <div className="patient-form">
+      <h2>{patient ? "Edit Patient" : "Add Patient"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>SSN:</label>
+          <input
+            type="text"
+            value={ssn}
+            onChange={(e) => setSSN(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Address:</label>
+          <input
+            type="text"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Phone:</label>
+          <input
+            type="text"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Insurance ID:</label>
+          <input
+            type="text"
+            value={insuranceId}
+            onChange={(e) => setInsuranceId(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{patient ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Patient {patient ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default PatientForm;
+4. src/components/patients/styles.css
+This file contains the styles for the patient-related components.
+
+css
+Copy
+/* Patient List Styles */
+.patient-list {
+  padding: 1rem;
+}
+
+.patient-list h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Patient Details Styles */
+.patient-details {
+  padding: 1rem;
+}
+
+.patient-details h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.patient-details .card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.patient-details p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.patient-details strong {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Patient Form Styles */
+.patient-form {
+  padding: 1rem;
+}
+
+.patient-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.patient-form div {
+  margin-bottom: 1rem;
+}
+
+.patient-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.patient-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+**5. Explanation of the Code
+API Integration
+fetchPatients: Fetches all patients.
+
+fetchPatientDetailsByPhysician: Fetches patient details checked by a specific physician.
+
+fetchPatientInsurance: Fetches the insurance ID of a patient.
+
+addPatient: Adds a new patient.
+
+updatePatientAddress: Updates the address of a patient.
+
+updatePatientPhone: Updates the phone number of a patient.

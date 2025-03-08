@@ -1,0 +1,186 @@
+
+1. src/components/dashboard/Dashboard.js
+This is the main dashboard component that aggregates statistics and charts.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchDashboardStatistics, fetchDashboardCharts } from "../../api/dashboardService";
+import StatisticsCard from "./StatisticsCard";
+import ChartComponent from "./ChartComponent";
+
+const Dashboard = () => {
+  const [statistics, setStatistics] = useState(null);
+  const [chartData, setChartData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch dashboard statistics
+        const stats = await fetchDashboardStatistics();
+        setStatistics(stats);
+
+        // Fetch dashboard chart data
+        const charts = await fetchDashboardCharts();
+        setChartData(charts);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+        setError("Failed to load dashboard data. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!statistics || !chartData) {
+    return <div>No data found for the dashboard.</div>;
+  }
+
+  return (
+    <div className="dashboard">
+      <h2>Dashboard</h2>
+      <div className="statistics">
+        <StatisticsCard title="Total Patients" value={statistics.totalPatients} />
+        <StatisticsCard title="Total Physicians" value={statistics.totalPhysicians} />
+        <StatisticsCard title="Total Appointments" value={statistics.totalAppointments} />
+        <StatisticsCard title="Total Nurses" value={statistics.totalNurses} />
+      </div>
+      <div className="charts">
+        <ChartComponent data={chartData.appointmentsByDate} title="Appointments by Date" />
+        <ChartComponent data={chartData.patientsByDepartment} title="Patients by Department" />
+      </div>
+    </div>
+  );
+};
+
+export default Dashboard;
+2. src/components/dashboard/StatisticsCard.js
+This component displays a single statistic in a card format.
+
+javascript
+Copy
+import React from "react";
+
+const StatisticsCard = ({ title, value }) => {
+  return (
+    <div className="statistics-card">
+      <h3>{title}</h3>
+      <p>{value}</p>
+    </div>
+  );
+};
+
+export default StatisticsCard;
+3. src/components/dashboard/ChartComponent.js
+This component displays a chart using a charting library (e.g., Chart.js or Recharts).
+
+javascript
+Copy
+import React from "react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts"; // npm install recharts
+
+const ChartComponent = ({ data, title }) => {
+  return (
+    <div className="chart-component">
+      <h3>{title}</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={data}>
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="value" fill="#8884d8" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+};
+
+export default ChartComponent;
+4. src/components/dashboard/styles.css
+This file contains the styles for the dashboard components.
+
+css
+Copy
+/* Dashboard Styles */
+.dashboard {
+  padding: 1rem;
+}
+
+.dashboard h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Statistics Card Styles */
+.statistics {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statistics-card {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  text-align: center;
+}
+
+.statistics-card h3 {
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.statistics-card p {
+  font-size: 1.5rem;
+  color: #007bff;
+}
+
+/* Chart Component Styles */
+.charts {
+  display: flex;
+  gap: 1rem;
+}
+
+.chart-component {
+  flex: 1;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.chart-component h3 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+**5. Explanation of the Code
+API Integration
+fetchDashboardStatistics: Fetches key statistics for the dashboard (e.g., total patients, physicians, appointments, nurses).
+
+fetchDashboardCharts: Fetches data for charts (e.g., appointments by date, patients by department).

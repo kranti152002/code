@@ -1,0 +1,940 @@
+Below is the complete implementation for each file in the src/api folder, including all the endpoints provided in your list. Each file corresponds to a specific service (e.g., Physician, Department, Patient, etc.) and includes functions to interact with the backend API.
+
+1. src/api/config.js
+This file contains the base URL for the API.
+
+
+
+
+
+javascript
+Copy
+export const API_BASE_URL = "http://localhost:5000/api"; // Replace with your backend URL
+
+
+
+
+2. src/api/index.js
+This file exports all the API services for easy import.
+
+javascript
+Copy
+export * from "./physicianService";
+export * from "./departmentService";
+export * from "./affiliatedWithService";
+export * from "./procedureService";
+export * from "./trainedInService";
+export * from "./patientService";
+export * from "./nurseService";
+export * from "./appointmentService";
+export * from "./dashboardService";
+3. src/api/physicianService.js
+This file handles all API calls related to physicians.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new physician
+export const addPhysician = async (physician) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/physician/post`, physician);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding physician:", error);
+    throw error;
+  }
+};
+
+// Search physician by name
+export const fetchPhysicianByName = async (name) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/physician/name/${name}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physician by name:", error);
+    return null;
+  }
+};
+
+// Search physicians by position
+export const fetchPhysiciansByPosition = async (position) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/physician/position/${position}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physicians by position:", error);
+    return [];
+  }
+};
+
+// Search physician by employee ID
+export const fetchPhysicianByEmployeeId = async (employeeId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/physician/empid/${employeeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physician by employee ID:", error);
+    return null;
+  }
+};
+
+// Update physician position
+export const updatePhysicianPosition = async (employeeId, position) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/update/position/${position}/${employeeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating physician position:", error);
+    throw error;
+  }
+};
+
+// Update physician name
+export const updatePhysicianName = async (employeeId, name) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/physician/update/name/${employeeId}`, { name });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating physician name:", error);
+    throw error;
+  }
+};
+
+// Update physician SSN
+export const updatePhysicianSSN = async (employeeId, ssn) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/physician/update/ssn/${employeeId}`, { ssn });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating physician SSN:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+4. src/api/departmentService.js
+This file handles all API calls related to departments.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new department
+export const addDepartment = async (department) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/department`, department);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding department:", error);
+    throw error;
+  }
+};
+
+// Get all departments
+export const fetchDepartments = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/department`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching departments:", error);
+    return [];
+  }
+};
+
+// Get department by ID
+export const fetchDepartmentById = async (departmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/department/${departmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching department by ID:", error);
+    return null;
+  }
+};
+
+// Get department head details
+export const fetchDepartmentHead = async (departmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/department/head/${departmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching department head:", error);
+    return null;
+  }
+};
+
+// Get department head certification
+export const fetchDepartmentHeadCertification = async (departmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/department/headcertification/${departmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching department head certification:", error);
+    return null;
+  }
+};
+
+// Update department head
+export const updateDepartmentHead = async (departmentId, headId) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/department/update/headid/${departmentId}`, { headId });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating department head:", error);
+    throw error;
+  }
+};
+
+// Update department name
+export const updateDepartmentName = async (departmentId, name) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/department/update/deptname/${departmentId}`, { name });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating department name:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+5. src/api/affiliatedWithService.js
+This file handles all API calls related to physician-department affiliations.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new affiliation
+export const addAffiliation = async (physicianId, departmentId, isPrimary) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/affiliated_with/post`, {
+      physician: physicianId,
+      department: departmentId,
+      primaryAffiliation: isPrimary,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error adding affiliation:", error);
+    throw error;
+  }
+};
+
+// Get all affiliations
+export const fetchAffiliations = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/affiliated_with`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching affiliations:", error);
+    return [];
+  }
+};
+
+// Get physicians affiliated with a department
+export const fetchPhysiciansByDepartment = async (departmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/affiliated_with/physicians/${departmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physicians by department:", error);
+    return [];
+  }
+};
+
+// Get departments affiliated with a physician
+export const fetchDepartmentsByPhysician = async (physicianId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/affiliated_with/department/${physicianId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching departments by physician:", error);
+    return [];
+  }
+};
+
+// Count physicians in a department
+export const countPhysiciansInDepartment = async (departmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/affiliated_with/countphysician/${departmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error counting physicians in department:", error);
+    return 0;
+  }
+};
+
+// Get primary affiliation of a physician
+export const fetchPrimaryAffiliation = async (physicianId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/affiliated_with/primary/${physicianId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching primary affiliation:", error);
+    return null;
+  }
+};
+
+// Update primary affiliation
+export const updatePrimaryAffiliation = async (physicianId, isPrimary) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/affiliated_with/primary/${physicianId}`, { isPrimary });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating primary affiliation:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+6. src/api/procedureService.js
+This file handles all API calls related to medical procedures.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new procedure
+export const addProcedure = async (procedure) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/procedure`, procedure);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding procedure:", error);
+    throw error;
+  }
+};
+
+// Get all procedures
+export const fetchProcedures = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/procedure`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching procedures:", error);
+    return [];
+  }
+};
+
+// Get procedure cost by ID
+export const fetchProcedureCostById = async (procedureId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/procedure/cost/${procedureId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching procedure cost by ID:", error);
+    return null;
+  }
+};
+
+// Get procedure cost by name
+export const fetchProcedureCostByName = async (name) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/procedure/cost/${name}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching procedure cost by name:", error);
+    return null;
+  }
+};
+
+// Update procedure cost
+export const updateProcedureCost = async (procedureId, cost) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/procedure/cost/${procedureId}`, { cost });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating procedure cost:", error);
+    throw error;
+  }
+};
+
+// Update procedure name
+export const updateProcedureName = async (procedureId, name) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/procedure/name/${procedureId}`, { name });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating procedure name:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+7. src/api/trainedInService.js
+This file handles all API calls related to physician training and certifications.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new certification
+export const addCertification = async (certification) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/trained_in`, certification);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding certification:", error);
+    throw error;
+  }
+};
+
+// Get all certifications
+export const fetchCertifications = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/trained_in`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching certifications:", error);
+    return [];
+  }
+};
+
+// Get treatments a physician can perform
+export const fetchTreatmentsByPhysician = async (physicianId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/trained_in/treatment/${physicianId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching treatments by physician:", error);
+    return [];
+  }
+};
+
+// Get physicians who can perform a specific treatment
+export const fetchPhysiciansByTreatment = async (procedureId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/trained_in/physicians/${procedureId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physicians by treatment:", error);
+    return [];
+  }
+};
+
+// Get certifications expiring soon
+export const fetchExpiringCertifications = async (physicianId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/trained_in/expiredsooncerti/${physicianId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching expiring certifications:", error);
+    return [];
+  }
+};
+
+// Update certification expiry date
+export const updateCertificationExpiry = async (physicianId, procedureId, expiryDate) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/trained_in/certificationexpiry/${physicianId}&${procedureId}`, { expiryDate });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating certification expiry:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+8. src/api/patientService.js
+This file handles all API calls related to patients.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new patient
+export const addPatient = async (patient) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/patient`, patient);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding patient:", error);
+    throw error;
+  }
+};
+
+// Get all patients
+export const fetchPatients = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/patient`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patients:", error);
+    return [];
+  }
+};
+
+// Get patients checked by a specific physician
+export const fetchPatientsByPhysician = async (physicianId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/patient/${physicianId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patients by physician:", error);
+    return [];
+  }
+};
+
+// Get patient details checked by a specific physician
+export const fetchPatientDetailsByPhysician = async (physicianId, patientId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/patient/${physicianId}/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patient details by physician:", error);
+    return null;
+  }
+};
+
+// Get patient insurance ID
+export const fetchPatientInsurance = async (patientId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/patient/insurance/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patient insurance:", error);
+    return null;
+  }
+};
+
+// Update patient address
+export const updatePatientAddress = async (ssn, address) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/patient/address/${ssn}`, { address });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating patient address:", error);
+    throw error;
+  }
+};
+
+// Update patient phone
+export const updatePatientPhone = async (ssn, phone) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/patient/phone/${ssn}`, { phone });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating patient phone:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+9. src/api/nurseService.js
+This file handles all API calls related to nurses.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new nurse
+export const addNurse = async (nurse) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/nurse`, nurse);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding nurse:", error);
+    throw error;
+  }
+};
+
+// Get all nurses
+export const fetchNurses = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/nurse`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurses:", error);
+    return [];
+  }
+};
+
+// Get nurse by employee ID
+export const fetchNurseByEmployeeId = async (employeeId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/nurse/${employeeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurse by employee ID:", error);
+    return null;
+  }
+};
+
+// Get nurse position
+export const fetchNursePosition = async (employeeId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/nurse/position/${employeeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurse position:", error);
+    return null;
+  }
+};
+
+// Check if nurse is registered
+export const fetchNurseRegistrationStatus = async (employeeId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/nurse/registered/${employeeId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurse registration status:", error);
+    return null;
+  }
+};
+
+// Update nurse registration status
+export const updateNurseRegistrationStatus = async (employeeId, isRegistered) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/nurse/registered/${employeeId}`, { isRegistered });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating nurse registration status:", error);
+    throw error;
+  }
+};
+
+// Update nurse SSN
+export const updateNurseSSN = async (employeeId, ssn) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/nurse/ssn/${employeeId}`, { ssn });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating nurse SSN:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+10. src/api/appointmentService.js
+This file handles all API calls related to appointments.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Add a new appointment
+export const addAppointment = async (appointment) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/appointment`, appointment);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding appointment:", error);
+    throw error;
+  }
+};
+
+// Get all appointments
+export const fetchAppointments = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching appointments:", error);
+    return [];
+  }
+};
+
+// Get appointments by start date
+export const fetchAppointmentsByStartDate = async (startDate) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/${startDate}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching appointments by start date:", error);
+    return [];
+  }
+};
+
+// Get patient information by appointment ID
+export const fetchPatientByAppointmentId = async (appointmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/patient/${appointmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patient by appointment ID:", error);
+    return null;
+  }
+};
+
+// Get physician information by appointment ID
+export const fetchPhysicianByAppointmentId = async (appointmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/physician/${appointmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physician by appointment ID:", error);
+    return null;
+  }
+};
+
+// Get nurse information by appointment ID
+export const fetchNurseByAppointmentId = async (appointmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/nurse/${appointmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurse by appointment ID:", error);
+    return null;
+  }
+};
+
+// Get examination room by appointment ID
+export const fetchExaminationRoomByAppointmentId = async (appointmentId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/examinationroom/${appointmentId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching examination room by appointment ID:", error);
+    return null;
+  }
+};
+
+// Get physicians by patient ID
+export const fetchPhysiciansByPatientId = async (patientId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/physician/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physicians by patient ID:", error);
+    return [];
+  }
+};
+
+// Get physician by patient ID and date
+export const fetchPhysicianByPatientIdAndDate = async (patientId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/physician/${patientId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching physician by patient ID and date:", error);
+    return null;
+  }
+};
+
+// Get nurses by patient ID
+export const fetchNursesByPatientId = async (patientId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/nurse/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurses by patient ID:", error);
+    return [];
+  }
+};
+
+// Get nurse by patient ID and date
+export const fetchNurseByPatientIdAndDate = async (patientId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/nurse/${patientId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching nurse by patient ID and date:", error);
+    return null;
+  }
+};
+
+// Get appointment dates for a patient
+export const fetchAppointmentDatesByPatientId = async (patientId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/date/${patientId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching appointment dates by patient ID:", error);
+    return [];
+  }
+};
+
+// Get patients checked by a physician
+export const fetchPatientsByPhysicianId = async (physicianId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/patient/${physicianId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patients by physician ID:", error);
+    return [];
+  }
+};
+
+// Get patients checked by a physician on a specific date
+export const fetchPatientsByPhysicianIdAndDate = async (physicianId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/patient/${physicianId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patients by physician ID and date:", error);
+    return [];
+  }
+};
+
+// Get patients checked by a nurse
+export const fetchPatientsByNurseId = async (nurseId) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/patient/${nurseId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patients by nurse ID:", error);
+    return [];
+  }
+};
+
+// Get patients checked by a nurse on a specific date
+export const fetchPatientsByNurseIdAndDate = async (nurseId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/patient/${nurseId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching patients by nurse ID and date:", error);
+    return [];
+  }
+};
+
+// Get room details by patient ID and date
+export const fetchRoomByPatientIdAndDate = async (patientId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/room/${patientId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching room by patient ID and date:", error);
+    return null;
+  }
+};
+
+// Get room details by physician ID and date
+export const fetchRoomByPhysicianIdAndDate = async (physicianId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/room/${physicianId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching room by physician ID and date:", error);
+    return null;
+  }
+};
+
+// Get room details by nurse ID and date
+export const fetchRoomByNurseIdAndDate = async (nurseId, date) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/appointment/room/${nurseId}/${date}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching room by nurse ID and date:", error);
+    return null;
+  }
+};
+
+// Update examination room by appointment ID
+export const updateExaminationRoom = async (appointmentId, room) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/appointment/room/${appointmentId}`, { room });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating examination room:", error);
+    throw error;
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11. src/api/dashboardService.js
+This file handles all API calls related to the dashboard.
+
+javascript
+Copy
+import axios from "axios";
+import { API_BASE_URL } from "./config";
+
+// Get dashboard statistics
+export const fetchDashboardStatistics = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/dashboard/statistics`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard statistics:", error);
+    return null;
+  }
+};
+
+// Get dashboard charts data
+export const fetchDashboardCharts = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/dashboard/charts`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching dashboard charts:", error);
+    return null;
+  }
+};

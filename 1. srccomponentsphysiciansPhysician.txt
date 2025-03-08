@@ -1,0 +1,190 @@
+1. src/components/physicians/PhysicianList.js
+This component displays a list of physicians.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchPhysicians } from "../../api/physicianService";
+import Table from "../common/Table";
+
+const PhysicianList = () => {
+  const [physicians, setPhysicians] = useState([]);
+
+  useEffect(() => {
+    fetchPhysicians().then((data) => setPhysicians(data));
+  }, []);
+
+  const columns = [
+    { header: "ID", accessor: "EmployeeID" },
+    { header: "Name", accessor: "Name" },
+    { header: "Position", accessor: "Position" },
+    { header: "SSN", accessor: "SSN" },
+  ];
+
+  return (
+    <div className="physician-list">
+      <h2>Physicians</h2>
+      <Table data={physicians} columns={columns} />
+    </div>
+  );
+};
+
+export default PhysicianList;
+2. src/components/physicians/PhysicianDetails.js
+This component displays detailed information about a specific physician.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchPhysicianByEmployeeId } from "../../api/physicianService";
+import Card from "../common/Card";
+
+const PhysicianDetails = () => {
+  const { employeeId } = useParams();
+  const [physician, setPhysician] = useState(null);
+
+  useEffect(() => {
+    fetchPhysicianByEmployeeId(employeeId).then((data) => setPhysician(data));
+  }, [employeeId]);
+
+  if (!physician) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="physician-details">
+      <h2>Physician Details</h2>
+      <Card>
+        <p><strong>ID:</strong> {physician.EmployeeID}</p>
+        <p><strong>Name:</strong> {physician.Name}</p>
+        <p><strong>Position:</strong> {physician.Position}</p>
+        <p><strong>SSN:</strong> {physician.SSN}</p>
+      </Card>
+    </div>
+  );
+};
+
+export default PhysicianDetails;
+3. src/components/physicians/PhysicianForm.js
+This component provides a form to add or update a physician.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addPhysician, updatePhysicianName, updatePhysicianPosition, updatePhysicianSSN } from "../../api/physicianService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const PhysicianForm = ({ physician, onSave }) => {
+  const [name, setName] = useState(physician ? physician.Name : "");
+  const [position, setPosition] = useState(physician ? physician.Position : "");
+  const [ssn, setSSN] = useState(physician ? physician.SSN : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newPhysician = { Name: name, Position: position, SSN: ssn };
+
+    try {
+      if (physician) {
+        // Update existing physician
+        await updatePhysicianName(physician.EmployeeID, name);
+        await updatePhysicianPosition(physician.EmployeeID, position);
+        await updatePhysicianSSN(physician.EmployeeID, ssn);
+      } else {
+        // Add new physician
+        await addPhysician(newPhysician);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving physician:", error);
+    }
+  };
+
+  return (
+    <div className="physician-form">
+      <h2>{physician ? "Edit Physician" : "Add Physician"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Position:</label>
+          <input
+            type="text"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>SSN:</label>
+          <input
+            type="text"
+            value={ssn}
+            onChange={(e) => setSSN(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{physician ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Physician {physician ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default PhysicianForm;
+4. src/components/physicians/styles.css
+This file contains the styles for the physician-related components.
+
+css
+Copy
+/* Physician List Styles */
+.physician-list {
+  padding: 1rem;
+}
+
+/* Physician Details Styles */
+.physician-details {
+  padding: 1rem;
+}
+
+.physician-details h2 {
+  margin-bottom: 1rem;
+}
+
+/* Physician Form Styles */
+.physician-form {
+  padding: 1rem;
+}
+
+.physician-form h2 {
+  margin-bottom: 1rem;
+}
+
+.physician-form div {
+  margin-bottom: 1rem;
+}
+
+.physician-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.physician-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}

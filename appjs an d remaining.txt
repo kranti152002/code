@@ -1,0 +1,261 @@
+javascript
+Copy
+import React from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import Header from "./components/common/Header";
+import Sidebar from "./components/common/Sidebar";
+import Footer from "./components/common/Footer";
+import HomePage from "./pages/HomePage";
+import PhysiciansPage from "./pages/PhysiciansPage";
+import DepartmentsPage from "./pages/DepartmentsPage";
+import AffiliationsPage from "./pages/AffiliationsPage";
+import ProceduresPage from "./pages/ProceduresPage";
+import TrainedInPage from "./pages/TrainedInPage";
+import PatientsPage from "./pages/PatientsPage";
+import NursesPage from "./pages/NursesPage";
+import AppointmentsPage from "./pages/AppointmentsPage";
+import DashboardPage from "./pages/DashboardPage";
+import LoginPage from "./pages/LoginPage";
+import "./styles/global.css";
+import "./styles/variables.css";
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <div className="app">
+          <Header />
+          <Sidebar />
+          <main>
+            <Routes>
+              {/* Home Page */}
+              <Route path="/" element={<HomePage />} />
+
+              {/* Physician Pages */}
+              <Route path="/physicians" element={<PhysiciansPage />} />
+
+              {/* Department Pages */}
+              <Route path="/departments" element={<DepartmentsPage />} />
+
+              {/* Affiliation Pages */}
+              <Route path="/affiliations" element={<AffiliationsPage />} />
+
+              {/* Procedure Pages */}
+              <Route path="/procedures" element={<ProceduresPage />} />
+
+              {/* Training/Certification Pages */}
+              <Route path="/trained-in" element={<TrainedInPage />} />
+
+              {/* Patient Pages */}
+              <Route path="/patients" element={<PatientsPage />} />
+
+              {/* Nurse Pages */}
+              <Route path="/nurses" element={<NursesPage />} />
+
+              {/* Appointment Pages */}
+              <Route path="/appointments" element={<AppointmentsPage />} />
+
+              {/* Dashboard Page */}
+              <Route path="/dashboard" element={<DashboardPage />} />
+
+              {/* Login Page */}
+              <Route path="/login" element={<LoginPage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </AuthProvider>
+  );
+};
+
+export default App;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+1. src/styles/global.css
+This file contains global styles for the application.
+
+css
+Copy
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+}
+2. src/styles/variables.css
+This file contains CSS variables for consistent theming.
+
+css
+Copy
+:root {
+  --primary-color: #007bff;
+  --secondary-color: #6c757d;
+  --success-color: #28a745;
+  --danger-color: #dc3545;
+  --light-color: #f8f9fa;
+  --dark-color: #343a40;
+  --font-family: Arial, sans-serif;
+}
+3. src/routes/index.js
+This file configures the application's routing.
+
+javascript
+Copy
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import HomePage from "../pages/HomePage";
+import PhysiciansPage from "../pages/PhysiciansPage";
+import DepartmentsPage from "../pages/DepartmentsPage";
+import AffiliationsPage from "../pages/AffiliationsPage";
+import ProceduresPage from "../pages/ProceduresPage";
+import TrainedInPage from "../pages/TrainedInPage";
+import PatientsPage from "../pages/PatientsPage";
+import NursesPage from "../pages/NursesPage";
+import AppointmentsPage from "../pages/AppointmentsPage";
+import DashboardPage from "../pages/DashboardPage";
+import LoginPage from "../pages/LoginPage";
+
+const AppRoutes = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/physicians" element={<PhysiciansPage />} />
+        <Route path="/departments" element={<DepartmentsPage />} />
+        <Route path="/affiliations" element={<AffiliationsPage />} />
+        <Route path="/procedures" element={<ProceduresPage />} />
+        <Route path="/trained-in" element={<TrainedInPage />} />
+        <Route path="/patients" element={<PatientsPage />} />
+        <Route path="/nurses" element={<NursesPage />} />
+        <Route path="/appointments" element={<AppointmentsPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default AppRoutes;
+4. src/App.js
+This is the main application component.
+
+javascript
+Copy
+import React from "react";
+import AppRoutes from "./routes";
+import { AuthProvider } from "./contexts/AuthContext";
+import "./styles/global.css";
+import "./styles/variables.css";
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+};
+
+export default App;
+5. src/index.js
+This is the entry point of the application.
+
+javascript
+Copy
+import React from "react";
+import ReactDOM from "react-dom";
+import App from "./App";
+
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+  document.getElementById("root")
+);
+**6. Explanation of the Code
+Global Styles
+global.css: Contains global styles for the application, including typography, buttons, inputs, and responsive styles.
+
+variables.css: Defines CSS variables for consistent theming across the application.
+
+Routing
+routes/index.js: Configures the application's routing using react-router-dom. Each route maps to a specific page component.
+
+Main Application
+App.js: The main application component that wraps the entire app with the AuthProvider and includes the AppRoutes for routing.
+
+index.js: The entry point of the application that renders the App component into the DOM.
+
+**7. Summary
+global.css: Contains global styles for the application.
+
+variables.css: Defines CSS variables for consistent theming.
+
+routes/index.js: Configures the application's routing.
+
+App.js: The main application component that wraps the app with AuthProvider and includes routing.
+
+index.js: The entry point of the application.
+
+
+
+
+
+
+
+
+
+

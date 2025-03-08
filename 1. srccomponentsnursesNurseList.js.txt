@@ -1,0 +1,309 @@
+1. src/components/nurses/NurseList.js
+This component displays a list of nurses.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchNurses } from "../../api/nurseService";
+import Table from "../common/Table";
+
+const NurseList = () => {
+  const [nurses, setNurses] = useState([]);
+
+  useEffect(() => {
+    fetchNurses().then((data) => setNurses(data));
+  }, []);
+
+  const columns = [
+    { header: "Employee ID", accessor: "EmployeeID" },
+    { header: "Name", accessor: "Name" },
+    { header: "Position", accessor: "Position" },
+    { header: "Registered", accessor: "Registered" },
+    { header: "SSN", accessor: "SSN" },
+  ];
+
+  return (
+    <div className="nurse-list">
+      <h2>Nurses</h2>
+      <Table data={nurses} columns={columns} />
+    </div>
+  );
+};
+
+export default NurseList;
+2. src/components/nurses/NurseDetails.js
+This component displays detailed information about a specific nurse.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { fetchNurseByEmployeeId, fetchNursePosition, fetchNurseRegistrationStatus } from "../../api/nurseService";
+import Card from "../common/Card";
+
+const NurseDetails = () => {
+  const { employeeId } = useParams();
+  const [nurse, setNurse] = useState(null);
+  const [position, setPosition] = useState(null);
+  const [isRegistered, setIsRegistered] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch nurse details
+        const nurseData = await fetchNurseByEmployeeId(employeeId);
+        setNurse(nurseData);
+
+        // Fetch nurse position
+        const positionData = await fetchNursePosition(employeeId);
+        setPosition(positionData);
+
+        // Fetch nurse registration status
+        const registrationStatus = await fetchNurseRegistrationStatus(employeeId);
+        setIsRegistered(registrationStatus);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching nurse details:", error);
+        setError("Failed to load nurse details. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [employeeId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!nurse || !position || isRegistered === null) {
+    return <div>No data found for this nurse.</div>;
+  }
+
+  return (
+    <div className="nurse-details">
+      <h2>Nurse Details</h2>
+      <Card>
+        <p>
+          <strong>Employee ID:</strong> {nurse.EmployeeID}
+        </p>
+        <p>
+          <strong>Name:</strong> {nurse.Name}
+        </p>
+        <p>
+          <strong>Position:</strong> {position}
+        </p>
+        <p>
+          <strong>Registered:</strong> {isRegistered ? "Yes" : "No"}
+        </p>
+        <p>
+          <strong>SSN:</strong> {nurse.SSN}
+        </p>
+      </Card>
+    </div>
+  );
+};
+
+export default NurseDetails;
+3. src/components/nurses/NurseForm.js
+This component provides a form to add or update a nurse.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addNurse, updateNurseRegistrationStatus, updateNurseSSN } from "../../api/nurseService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const NurseForm = ({ nurse, onSave }) => {
+  const [employeeId, setEmployeeId] = useState(nurse ? nurse.EmployeeID : "");
+  const [name, setName] = useState(nurse ? nurse.Name : "");
+  const [position, setPosition] = useState(nurse ? nurse.Position : "");
+  const [isRegistered, setIsRegistered] = useState(nurse ? nurse.Registered : false);
+  const [ssn, setSSN] = useState(nurse ? nurse.SSN : "");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newNurse = { EmployeeID: employeeId, Name: name, Position: position, Registered: isRegistered, SSN: ssn };
+
+    try {
+      if (nurse) {
+        // Update existing nurse
+        await updateNurseRegistrationStatus(employeeId, isRegistered);
+        await updateNurseSSN(employeeId, ssn);
+      } else {
+        // Add new nurse
+        await addNurse(newNurse);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving nurse:", error);
+    }
+  };
+
+  return (
+    <div className="nurse-form">
+      <h2>{nurse ? "Edit Nurse" : "Add Nurse"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Employee ID:</label>
+          <input
+            type="text"
+            value={employeeId}
+            onChange={(e) => setEmployeeId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Name:</label>
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Position:</label>
+          <input
+            type="text"
+            value={position}
+            onChange={(e) => setPosition(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Registered:</label>
+          <input
+            type="checkbox"
+            checked={isRegistered}
+            onChange={(e) => setIsRegistered(e.target.checked)}
+          />
+        </div>
+        <div>
+          <label>SSN:</label>
+          <input
+            type="text"
+            value={ssn}
+            onChange={(e) => setSSN(e.target.value)}
+            required
+          />
+        </div>
+        <Button type="submit">{nurse ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Nurse {nurse ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default NurseForm;
+4. src/components/nurses/styles.css
+This file contains the styles for the nurse-related components.
+
+css
+Copy
+/* Nurse List Styles */
+.nurse-list {
+  padding: 1rem;
+}
+
+.nurse-list h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Nurse Details Styles */
+.nurse-details {
+  padding: 1rem;
+}
+
+.nurse-details h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.nurse-details .card {
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.nurse-details p {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.nurse-details strong {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Nurse Form Styles */
+.nurse-form {
+  padding: 1rem;
+}
+
+.nurse-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.nurse-form div {
+  margin-bottom: 1rem;
+}
+
+.nurse-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.nurse-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.nurse-form input[type="checkbox"] {
+  width: auto;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+**5. Explanation of the Code
+API Integration
+fetchNurses: Fetches all nurses.
+
+fetchNurseByEmployeeId: Fetches nurse details by employee ID.
+
+fetchNursePosition: Fetches the position of a nurse.
+
+fetchNurseRegistrationStatus: Fetches the registration status of a nurse.
+
+addNurse: Adds a new nurse.
+
+updateNurseRegistrationStatus: Updates the registration status of a nurse.
+
+updateNurseSSN: Updates the SSN of a nurse

@@ -1,0 +1,301 @@
+1. src/components/affiliations/AffiliationList.js
+This component displays a list of physician-department affiliations.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { fetchAffiliations } from "../../api/affiliatedWithService";
+import Table from "../common/Table";
+
+const AffiliationList = () => {
+  const [affiliations, setAffiliations] = useState([]);
+
+  useEffect(() => {
+    fetchAffiliations().then((data) => setAffiliations(data));
+  }, []);
+
+  const columns = [
+    { header: "Physician ID", accessor: "Physician" },
+    { header: "Department ID", accessor: "Department" },
+    { header: "Primary Affiliation", accessor: "PrimaryAffiliation" },
+  ];
+
+  return (
+    <div className="affiliation-list">
+      <h2>Physician-Department Affiliations</h2>
+      <Table data={affiliations} columns={columns} />
+    </div>
+  );
+};
+
+export default AffiliationList;
+2. src/components/affiliations/AffiliationForm.js
+This component provides a form to add or update a physician-department affiliation.
+
+javascript
+Copy
+import React, { useState } from "react";
+import { addAffiliation, updatePrimaryAffiliation } from "../../api/affiliatedWithService";
+import Button from "../common/Button";
+import Modal from "../common/Modal";
+
+const AffiliationForm = ({ affiliation, onSave }) => {
+  const [physicianId, setPhysicianId] = useState(affiliation ? affiliation.Physician : "");
+  const [departmentId, setDepartmentId] = useState(affiliation ? affiliation.Department : "");
+  const [isPrimary, setIsPrimary] = useState(affiliation ? affiliation.PrimaryAffiliation : false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const newAffiliation = { Physician: physicianId, Department: departmentId, PrimaryAffiliation: isPrimary };
+
+    try {
+      if (affiliation) {
+        // Update primary affiliation
+        await updatePrimaryAffiliation(physicianId, isPrimary);
+      } else {
+        // Add new affiliation
+        await addAffiliation(physicianId, departmentId, isPrimary);
+      }
+      setIsModalOpen(true);
+      onSave();
+    } catch (error) {
+      console.error("Error saving affiliation:", error);
+    }
+  };
+
+  return (
+    <div className="affiliation-form">
+      <h2>{affiliation ? "Edit Affiliation" : "Add Affiliation"}</h2>
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Physician ID:</label>
+          <input
+            type="text"
+            value={physicianId}
+            onChange={(e) => setPhysicianId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Department ID:</label>
+          <input
+            type="text"
+            value={departmentId}
+            onChange={(e) => setDepartmentId(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Primary Affiliation:</label>
+          <input
+            type="checkbox"
+            checked={isPrimary}
+            onChange={(e) => setIsPrimary(e.target.checked)}
+          />
+        </div>
+        <Button type="submit">{affiliation ? "Update" : "Add"}</Button>
+      </form>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <p>Affiliation {affiliation ? "updated" : "added"} successfully!</p>
+      </Modal>
+    </div>
+  );
+};
+
+export default AffiliationForm;
+3. src/components/affiliations/AffiliationDetails.js
+This component displays detailed information about a specific physician-department affiliation.
+
+javascript
+Copy
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import {
+  fetchPhysiciansByDepartment,
+  fetchDepartmentsByPhysician,
+  fetchPrimaryAffiliation,
+} from "../../api/affiliatedWithService";
+import Card from "../common/Card";
+
+const AffiliationDetails = () => {
+  const { physicianId, departmentId } = useParams();
+  const [physicians, setPhysicians] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [primaryAffiliation, setPrimaryAffiliation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch physicians affiliated with the department
+        const physiciansData = await fetchPhysiciansByDepartment(departmentId);
+        setPhysicians(physiciansData);
+
+        // Fetch departments affiliated with the physician
+        const departmentsData = await fetchDepartmentsByPhysician(physicianId);
+        setDepartments(departmentsData);
+
+        // Fetch primary affiliation of the physician
+        const primaryAffiliationData = await fetchPrimaryAffiliation(physicianId);
+        setPrimaryAffiliation(primaryAffiliationData);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching affiliation details:", error);
+        setError("Failed to load affiliation details. Please try again later.");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [physicianId, departmentId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  if (!physicians.length || !departments.length || !primaryAffiliation) {
+    return <div>No data found for this affiliation.</div>;
+  }
+
+  return (
+    <div className="affiliation-details">
+      <h2>Affiliation Details</h2>
+      <Card>
+        <p>
+          <strong>Physician ID:</strong> {physicianId}
+        </p>
+        <p>
+          <strong>Department ID:</strong> {departmentId}
+        </p>
+        <p>
+          <strong>Primary Affiliation:</strong> {primaryAffiliation ? "Yes" : "No"}
+        </p>
+      </Card>
+
+      <h3>Physicians in this Department</h3>
+      <ul>
+        {physicians.map((physician) => (
+          <li key={physician.EmployeeID}>
+            {physician.Name} (ID: {physician.EmployeeID})
+          </li>
+        ))}
+      </ul>
+
+      <h3>Departments for this Physician</h3>
+      <ul>
+        {departments.map((department) => (
+          <li key={department.DepartmentID}>
+            {department.Name} (ID: {department.DepartmentID})
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default AffiliationDetails;
+4. src/components/affiliations/styles.css
+This file contains the styles for the affiliation-related components.
+
+css
+Copy
+/* Affiliation List Styles */
+.affiliation-list {
+  padding: 1rem;
+}
+
+.affiliation-list h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+/* Affiliation Form Styles */
+.affiliation-form {
+  padding: 1rem;
+}
+
+.affiliation-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.affiliation-form div {
+  margin-bottom: 1rem;
+}
+
+.affiliation-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+.affiliation-form input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.affiliation-form input[type="checkbox"] {
+  width: auto;
+}
+
+/* Affiliation Details Styles */
+.affiliation-details {
+  padding: 1rem;
+}
+
+.affiliation-details h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.affiliation-details h3 {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.affiliation-details ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.affiliation-details ul li {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Error Message Styles */
+.error {
+  color: #ff0000;
+  font-size: 1rem;
+  margin-top: 1rem;
+}
+**5. Explanation of the Code
+API Integration
+fetchAffiliations: Fetches all physician-department affiliations.
+
+addAffiliation: Adds a new affiliation.
+
+updatePrimaryAffiliation: Updates the primary affiliation status.
+
+fetchPhysiciansByDepartment: Fetches physicians affiliated with a specific department.
+
+fetchDepartmentsByPhysician: Fetches departments affiliated with a specific physician.
+
+fetchPrimaryAffiliation: Fetches the primary affiliation status of a physician.
+
+St

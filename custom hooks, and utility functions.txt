@@ -1,0 +1,255 @@
+custom hooks, and utility functions.
+
+1. src/contexts/AuthContext.js
+This file provides an authentication context for managing user authentication state.
+
+javascript
+Copy
+import React, { createContext, useState, useContext } from "react";
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+
+  const login = (userData) => {
+    setUser(userData);
+  };
+
+  const logout = () => {
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+
+
+
+
+
+
+
+
+
+
+
+2. src/hooks/useAuth.js
+This custom hook provides access to the authentication context.
+
+javascript
+Copy
+import { useAuth } from "../contexts/AuthContext";
+
+export const useAuth = () => {
+  return useAuth();
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+3. src/hooks/useFetch.js
+This custom hook simplifies fetching data from APIs.
+
+javascript
+Copy
+import { useState, useEffect } from "react";
+import axios from "axios";
+
+export const useFetch = (url) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(url);
+        setData(response.data);
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+};
+
+
+
+
+
+
+
+
+
+
+
+4. src/hooks/useForm.js
+This custom hook simplifies form management.
+
+javascript
+Copy
+import { useState } from "react";
+
+export const useForm = (initialValues) => {
+  const [values, setValues] = useState(initialValues);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues({
+      ...values,
+      [name]: value,
+    });
+  };
+
+  return {
+    values,
+    handleChange,
+  };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5. src/utils/dateUtils.js
+This file contains utility functions for working with dates.
+
+javascript
+Copy
+export const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+export const formatDateTime = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+
+
+
+
+
+
+
+
+
+6. src/utils/formatters.js
+This file contains utility functions for formatting data.
+
+javascript
+Copy
+export const formatCurrency = (amount) => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format(amount);
+};
+
+export const capitalize = (str) => {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+
+
+
+
+
+
+
+
+
+
+7. src/utils/validators.js
+This file contains utility functions for validating data.
+
+javascript
+Copy
+export const validateEmail = (email) => {
+  const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return regex.test(email);
+};
+
+export const validatePhone = (phone) => {
+  const regex = /^\d{10}$/;
+  return regex.test(phone);
+};
+
+export const validateRequired = (value) => {
+  return value.trim() !== "";
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+**8. Explanation of the Code
+AuthContext
+AuthContext: Provides a context for managing user authentication state.
+
+AuthProvider: Wraps the application and provides the authentication context to all components.
+
+useAuth: A custom hook to access the authentication context.
+
+Custom Hooks
+useFetch: Simplifies fetching data from APIs by handling loading and error states.
+
+useForm: Simplifies form management by handling form state and changes.
+
+Utility Functions
+dateUtils.js: Provides functions for formatting dates and times.
+
+formatters.js: Provides functions for formatting currency and capitalizing strings.
+
+validators.js: Provides functions for validating email, phone, and required fields.
